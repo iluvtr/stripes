@@ -4,7 +4,7 @@
     <parent>
         <groupId>net.sourceforge.stripes</groupId>
         <artifactId>stripes-parent</artifactId>
-        <version>1.5.7</version>
+        <version>1.5.7-classloaderfix</version>
     </parent>
     <artifactId>webtests</artifactId>
     <packaging>war</packaging>
@@ -91,10 +91,11 @@
                     <wait>false</wait>
                   <container>
                     <containerId>tomcat6x</containerId>
-                    <zipUrlInstaller>
-                      <url>http://mirror.ibcp.fr/pub/apache//tomcat/tomcat-6/v6.0.29/bin/apache-tomcat-6.0.29.zip</url>
-                      <installDir>${basedir}/target/tomcat6-install</installDir>
-                    </zipUrlInstaller>
+                      <zipUrlInstaller>
+                          <url>http://mirrors.linsrv.net/apache/tomcat/tomcat-6/v6.0.39/bin/apache-tomcat-6.0.39.tar.gz</url>
+                          <downloadDir>${project.build.directory}/downloads</downloadDir>
+                          <extractDir>${project.build.directory}/extracts</extractDir>
+                      </zipUrlInstaller>
                   </container>
                   <configuration>
                     <home>${project.build.directory}/tomcat6x/container</home>
