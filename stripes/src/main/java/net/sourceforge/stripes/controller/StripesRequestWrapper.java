@@ -14,7 +14,6 @@
  */
 package net.sourceforge.stripes.controller;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,7 +33,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
 import net.sourceforge.stripes.action.FileBean;
-import net.sourceforge.stripes.controller.json.JsonContentTypeRequestWrapper;
 import net.sourceforge.stripes.controller.multipart.MultipartWrapper;
 import net.sourceforge.stripes.exception.StripesServletException;
 import net.sourceforge.stripes.exception.UrlBindingConflictException;
@@ -123,21 +121,31 @@ public class StripesRequestWrapper extends HttpServletRequestWrapper {
         if (contentType != null) {
             if (isPost && contentType.startsWith("multipart/form-data")) {
                 constructMultipartWrapper(request);
-            } else if (contentType.toLowerCase().contains("json") && request.getContentLength() > 0) {
-                this.contentTypeRequestWrapper = new JsonContentTypeRequestWrapper();
-                try {
-                    this.contentTypeRequestWrapper.build(request);
-                } catch (IOException ioe) {
-                    throw new StripesServletException("Could not construct JSON request wrapper.", ioe);
-                }
+            } else if (request.getContentLength() > 0) {
+                constructContentTypeRequestWrapperIfSupported(request);
             }
         }
-
         // Create a parameter map that merges the URI parameters with the others
         if (contentTypeRequestWrapper != null) {
             this.parameterMap = new MergedParameterMap(this, this.contentTypeRequestWrapper);
         } else {
             this.parameterMap = new MergedParameterMap(this);
+        }
+    }
+
+    protected void constructContentTypeRequestWrapperIfSupported(HttpServletRequest request) throws StripesServletException {
+        ContentTypeRequestWrapperFactory contentTypeRequestWrapperFactory = StripesFilter.getConfiguration().getContentTypeRequestWrapperFactory();
+        try {
+            contentTypeRequestWrapper = contentTypeRequestWrapperFactory.wrap(request);
+        } catch (Exception e) {
+            throw new StripesServletException("Could not construct request wrapper.", e);
+        }
+        if (contentTypeRequestWrapper != null) {
+            try {
+                this.contentTypeRequestWrapper.build(request);
+            } catch (IOException ioe) {
+                throw new StripesServletException("Could not construct JSON request wrapper.", ioe);
+            }
         }
     }
 
@@ -484,7 +492,7 @@ class MergedParameterMap implements Map<String, String[]> {
      */
     @SuppressWarnings("unchecked")
     Map<String, String[]> getParameterMap() {
-        return request == null ? Collections.<String,String[]>emptyMap() : request.getRequest().getParameterMap();
+        return request == null ? Collections.<String, String[]>emptyMap() : request.getRequest().getParameterMap();
     }
 
     /**

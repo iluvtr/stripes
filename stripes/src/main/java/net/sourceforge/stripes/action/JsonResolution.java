@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletResponse;
  * type of resolution will take a Java object and serialize it to JSON
  * automatically.
  */
-public class JsonResolution implements Resolution {
+public class JsonResolution extends HttpResolution{
 
     private final JsonBuilder builder;
 
@@ -37,9 +37,10 @@ public class JsonResolution implements Resolution {
      * @param propertiesToExclude - Properties to exclude from marshaling
      */
     public JsonResolution(Object objectToSerialize, String... propertiesToExclude) {
-        builder = new JsonBuilder( objectToSerialize, propertiesToExclude );
+        super(HttpServletResponse.SC_OK);
+        builder = new JsonBuilder( objectToSerialize, propertiesToExclude ); 
     }
-
+     
     /**
      * Converts the object passed in to JSON and streams it back to the client.
      * @throws java.lang.Exception

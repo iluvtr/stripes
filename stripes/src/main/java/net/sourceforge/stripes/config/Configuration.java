@@ -32,6 +32,7 @@ import net.sourceforge.stripes.exception.ExceptionHandler;
 
 import javax.servlet.ServletContext;
 import java.util.Collection;
+import net.sourceforge.stripes.controller.ContentTypeRequestWrapperFactory;
 
 /**
  * <p>Type safe interface for accessing configuration information used to configure Stripes. All
@@ -210,4 +211,13 @@ public interface Configuration {
      * @return an instance of {@link ValidationMetadataProvider}
      */
     ValidationMetadataProvider getValidationMetadataProvider();
+    
+    
+      /**
+     * Returns an instance of ContentTypeRequestWrapperFactory that can be used by Stripes to construct
+     * ContentTypeRequestWrapper instances which can parse body content for a given content-type 
+     *
+     * @return MultipartWrapperFactory an instance of the wrapper factory
+     */
+    ContentTypeRequestWrapperFactory getContentTypeRequestWrapperFactory();
 }

@@ -28,7 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 public interface ContentTypeRequestWrapperFactory extends ConfigurableComponent {
     /**
      * Wraps the request in an appropriate implementation of ContentTypeWrapper that is capable
-     * of providing access to request parameters 
+     * of providing access to request parameters. If this class hasn't an implementation to handle the request will return null
      *
      * @param request an active HttpServletRequest
      * @return an implementation of the appropriate wrapper

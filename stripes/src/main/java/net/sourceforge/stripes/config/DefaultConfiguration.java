@@ -30,8 +30,10 @@ import net.sourceforge.stripes.controller.ActionBeanContextFactory;
 import net.sourceforge.stripes.controller.ActionBeanPropertyBinder;
 import net.sourceforge.stripes.controller.ActionResolver;
 import net.sourceforge.stripes.controller.BeforeAfterMethodInterceptor;
+import net.sourceforge.stripes.controller.ContentTypeRequestWrapperFactory;
 import net.sourceforge.stripes.controller.DefaultActionBeanContextFactory;
 import net.sourceforge.stripes.controller.DefaultActionBeanPropertyBinder;
+import net.sourceforge.stripes.controller.DefaultContentTypeRequestWrapperFactory;
 import net.sourceforge.stripes.controller.DefaultObjectFactory;
 import net.sourceforge.stripes.controller.HttpCacheInterceptor;
 import net.sourceforge.stripes.controller.Interceptor;
@@ -101,7 +103,8 @@ public class DefaultConfiguration implements Configuration {
     private ExceptionHandler exceptionHandler;
     private MultipartWrapperFactory multipartWrapperFactory;
     private ValidationMetadataProvider validationMetadataProvider;
-
+    private ContentTypeRequestWrapperFactory contentTypeRequestWrapperFactory;
+    
     /** Gratefully accepts the BootstrapPropertyResolver handed to the Configuration. */
     public void setBootstrapPropertyResolver(BootstrapPropertyResolver resolver) {
         this.resolver = resolver;
@@ -212,6 +215,12 @@ public class DefaultConfiguration implements Configuration {
                 this.validationMetadataProvider.init(this);
             }
 
+            
+            this.contentTypeRequestWrapperFactory = initContentTypeRequestWrapperFactory();
+            if (this.contentTypeRequestWrapperFactory == null) {
+                this.contentTypeRequestWrapperFactory = new DefaultContentTypeRequestWrapperFactory();
+                this.contentTypeRequestWrapperFactory.init(this);
+            }
             this.interceptors = new HashMap<LifecycleStage, Collection<Interceptor>>();
             Map<LifecycleStage, Collection<Interceptor>> map = initCoreInterceptors();
             if (map != null) {
@@ -512,4 +521,13 @@ public class DefaultConfiguration implements Configuration {
 
     /** Allows subclasses to initialize a non-default Map of Interceptor instances. */
     protected Map<LifecycleStage,Collection<Interceptor>> initInterceptors() { return null; }
+    
+    protected ContentTypeRequestWrapperFactory initContentTypeRequestWrapperFactory() { return null; }
+
+    @Override
+    public ContentTypeRequestWrapperFactory getContentTypeRequestWrapperFactory() {
+        return contentTypeRequestWrapperFactory;
+    }
+    
+    
 }

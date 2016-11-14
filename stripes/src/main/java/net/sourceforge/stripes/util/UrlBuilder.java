@@ -353,7 +353,7 @@ public class UrlBuilder {
         Configuration configuration = StripesFilter.getConfiguration();
         if (configuration != null) {
             Class<? extends ActionBean> beanType = null;
-            try {
+            try {  
                 beanType = configuration.getActionResolver().getActionBeanType(this.baseUrl);
             }
             catch (UrlBindingConflictException e) {
