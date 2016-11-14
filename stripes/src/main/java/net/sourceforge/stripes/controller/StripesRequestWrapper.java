@@ -14,6 +14,7 @@
  */
 package net.sourceforge.stripes.controller;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -122,7 +123,7 @@ public class StripesRequestWrapper extends HttpServletRequestWrapper {
         if (contentType != null) {
             if (isPost && contentType.startsWith("multipart/form-data")) {
                 constructMultipartWrapper(request);
-            } else if (contentType.toLowerCase().contains("json")) {
+            } else if (contentType.toLowerCase().contains("json") && request.getContentLength() > 0) {
                 this.contentTypeRequestWrapper = new JsonContentTypeRequestWrapper();
                 try {
                     this.contentTypeRequestWrapper.build(request);
@@ -293,7 +294,7 @@ public class StripesRequestWrapper extends HttpServletRequestWrapper {
         if (this.contentTypeRequestWrapper != null && MultipartWrapper.class.isAssignableFrom(this.contentTypeRequestWrapper.getClass())) {
             return ((MultipartWrapper) this.contentTypeRequestWrapper).getFileParameterNames();
         } else {
-            return Collections.emptyEnumeration();
+            return Collections.enumeration(Collections.<String>emptyList());
         }
     }
 
@@ -483,7 +484,7 @@ class MergedParameterMap implements Map<String, String[]> {
      */
     @SuppressWarnings("unchecked")
     Map<String, String[]> getParameterMap() {
-        return request == null ? Collections.emptyMap() : request.getRequest().getParameterMap();
+        return request == null ? Collections.<String,String[]>emptyMap() : request.getRequest().getParameterMap();
     }
 
     /**

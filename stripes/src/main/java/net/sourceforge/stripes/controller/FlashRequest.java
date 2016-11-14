@@ -1,20 +1,13 @@
 package net.sourceforge.stripes.controller;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.Serializable;
 import java.security.Principal;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import javax.servlet.*;
+import javax.servlet.http.*;
 
 /**
  * Captures the state of an {@link javax.servlet.http.HttpServletRequest} so that the information
@@ -123,17 +116,18 @@ public class FlashRequest implements HttpServletRequest, Serializable {
         servletPath = prototype.getServletPath();
 
         // copy attributes
-        for (String key : Collections.list((Enumeration<String>) prototype.getAttributeNames())) {
+        for (String key : Collections.list(prototype.getAttributeNames())) {
             attributes.put(key, prototype.getAttribute(key));
         }
 
         // copy headers
-        for (String key : Collections.list((Enumeration<String>) prototype.getHeaderNames())) {
+        for (String key : Collections.list(prototype.getHeaderNames())) {
             headers.put(key, Collections.list(prototype.getHeaders(key)));
             try {
                 dateHeaders.put(key, prototype.getDateHeader(key));
             }
             catch (Exception e) {
+                // dunno
             }
         }
 
@@ -382,5 +376,66 @@ public class FlashRequest implements HttpServletRequest, Serializable {
 
     public int getLocalPort() {
         return localPort;
+    }
+
+
+    public String changeSessionId() {
+        return getDelegate().changeSessionId();
+    }
+
+    public boolean authenticate(HttpServletResponse response) throws IOException, ServletException {
+        return delegate.authenticate(response);
+    }
+
+    public void login(String username, String password) throws ServletException {
+        delegate.login(username, password);
+    }
+
+    public void logout() throws ServletException {
+        delegate.logout();
+    }
+
+    public Collection<Part> getParts() throws IOException, ServletException {
+        return delegate.getParts();
+    }
+
+    public Part getPart(String name) throws IOException, ServletException {
+        return delegate.getPart(name);
+    }
+
+    public <T extends HttpUpgradeHandler> T upgrade(Class<T> handlerClass) throws IOException, ServletException {
+        return delegate.upgrade(handlerClass);
+    }
+
+    public long getContentLengthLong() {
+        return 0;
+    }
+
+    public ServletContext getServletContext() {
+        return delegate.getServletContext();
+    }
+
+    public AsyncContext startAsync() throws IllegalStateException {
+        return delegate.startAsync();
+    }
+
+    public AsyncContext startAsync(ServletRequest servletRequest, ServletResponse servletResponse) throws IllegalStateException {
+        return delegate.startAsync(servletRequest, servletResponse);
+    }
+
+    public boolean isAsyncStarted() {
+        return delegate.isAsyncStarted();
+    }
+
+    public boolean isAsyncSupported() {
+        return delegate.isAsyncSupported();
+    }
+
+    public AsyncContext getAsyncContext() {
+        return delegate.getAsyncContext();
+    }
+
+    public DispatcherType getDispatcherType() {
+        return delegate.getDispatcherType();
     }
 }

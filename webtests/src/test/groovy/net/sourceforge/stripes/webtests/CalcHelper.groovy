@@ -1,4 +1,4 @@
-package net.sourceforge.stripes.webtests.calc
+package net.sourceforge.stripes.webtests
 
 import com.google.common.base.Function
 import com.pojosontheweb.selenium.Findr
@@ -17,7 +17,7 @@ class CalcHelper {
     CalcHelper(Findr findr, boolean ajax) {
         this.findr = findr
         this.ajax = ajax
-        this.homeUrl = ajax ? 'http://localhost:9999/webtests/ajax/index.jsp' : 'http://localhost:9999/webtests/quickstart/index.jsp'
+        this.homeUrl = ajax ? "${BaseUrl.get()}/ajax/index.jsp" : "${BaseUrl.get()}/quickstart/index.jsp"
     }
 
     void openPage() {
@@ -49,7 +49,7 @@ class CalcHelper {
     }
 
     void assertResult(String expected) {
-        findr.elemList(id('result'))
+        findr.elemList(id('resultWrapper'))
             .whereElemCount(1)
             .at(0)
             .where(textEquals(expected))
@@ -58,13 +58,24 @@ class CalcHelper {
 
     void assertValidationErrors(String... expectedErrors) {
 
+        def sortedExpectedErrors = Arrays.asList(expectedErrors)
+        Collections.sort(sortedExpectedErrors)
+
         def func = new Function<List<WebElement>, Boolean>() {
             @Override
             Boolean apply(List<WebElement> divs) {
-                for (int i = 0; i < expectedErrors.length; i++) {
-                    String expected = expectedErrors[i]
-                    String actual = divs[i].text
+
+                // we have random ordering issues, so
+                // we sort those lists...
+                List<String> texts = divs.collect { it.text }.sort()
+
+                for (int i = 0; i < sortedExpectedErrors.size(); i++) {
+                    String expected = sortedExpectedErrors[i]
+                    String actual = texts[i]
                     if (expected != actual) {
+                        Findr.logDebug("""unexpected validation :
+expected='$expected'
+actual='$actual'""")
                         return false
                     }
                 }
@@ -73,7 +84,7 @@ class CalcHelper {
         }
 
         if (ajax) {
-            findr.elem(id('result'))
+            findr.elem(id('resultWrapper'))
                 .elemList(tagName('div'))
                 .whereElemCount(expectedErrors.length)
                 .eval(func)

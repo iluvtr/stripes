@@ -15,11 +15,8 @@
 package net.sourceforge.stripes.controller;
 
 import java.lang.annotation.Annotation;
-import net.sourceforge.stripes.action.ActionBean;
-import net.sourceforge.stripes.action.ActionBeanContext;
-import net.sourceforge.stripes.action.DontBind;
-import net.sourceforge.stripes.action.DontValidate;
-import net.sourceforge.stripes.action.Resolution;
+
+import net.sourceforge.stripes.action.*;
 import net.sourceforge.stripes.config.Configuration;
 import net.sourceforge.stripes.exception.StripesServletException;
 import net.sourceforge.stripes.util.HtmlUtil;
@@ -32,6 +29,7 @@ import net.sourceforge.stripes.validation.ValidationMethod;
 import net.sourceforge.stripes.validation.ValidationState;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.PageContext;
 import java.lang.reflect.Method;
 import java.lang.ref.WeakReference;
@@ -48,16 +46,6 @@ import java.util.MissingResourceException;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.WeakHashMap;
-import javax.servlet.http.HttpServletResponse;
-import net.sourceforge.stripes.action.DELETE;
-import net.sourceforge.stripes.action.ErrorResolution;
-import net.sourceforge.stripes.action.GET;
-import net.sourceforge.stripes.action.HEAD;
-import net.sourceforge.stripes.action.HttpRequestMethod;
-import net.sourceforge.stripes.action.JsonBuilder;
-import net.sourceforge.stripes.action.POST;
-import net.sourceforge.stripes.action.PUT;
-import net.sourceforge.stripes.action.RestActionBean;
 
 /**
  * Helper class that contains much of the logic used when dispatching requests
@@ -188,8 +176,8 @@ public class DispatcherHelper {
                         handler = resolver.getHandler(bean.getClass(), eventName);
                     } else {
                         // If there is no event name given and this is a RestActionBean, then
-                        // attempt to find the handler method by using the HTTP 
-                        // request method itself as the event name.  
+                        // attempt to find the handler method by using the HTTP
+                        // request method itself as the event name.
                         if (bean.getClass().isAnnotationPresent(RestActionBean.class)) {
                             eventName = context.getRequest().getMethod().toLowerCase();
                             handler = resolver.getHandler(bean.getClass(), eventName);
@@ -297,7 +285,7 @@ public class DispatcherHelper {
         Configuration config = StripesFilter.getConfiguration();
 
         // Run the bean's methods annotated with @ValidateMethod if the following conditions are met:
-        //   l. This event is not marked to bypass binding 
+        //   l. This event is not marked to bypass binding
         //   2. This event is not marked to bypass validation (doValidate == true)
         //   3. We have no errors so far OR alwaysInvokeValidate is true
         if (doValidate) {
@@ -361,7 +349,7 @@ public class DispatcherHelper {
     }
 
     /**
-     * Finds and returns all methods in the ActionBean class and it's
+     * Finds and returns all methods in the ActionBean class and its
      * superclasses that are marked with the ValidationMethod annotation and
      * returns them ordered by priority (and alphabetically within priorities).
      * Looks first in an instance level cache, and if that does not contain
@@ -393,7 +381,7 @@ public class DispatcherHelper {
 
                     ValidationMethod ann1 = o1.getAnnotation(ValidationMethod.class);
                     ValidationMethod ann2 = o2.getAnnotation(ValidationMethod.class);
-                    int returnValue = new Integer(ann1.priority()).compareTo(ann2.priority());
+                    int returnValue = Integer.valueOf(ann1.priority()).compareTo(ann2.priority());
 
                     if (returnValue == 0) {
                         returnValue = o1.getName().compareTo(o2.getName());
@@ -457,6 +445,9 @@ public class DispatcherHelper {
             // For RestActionBean objects, we need to package up all of the validation errors
             // and return them to the caller in an ErrorResolution
             if (bean.getClass().isAnnotationPresent(RestActionBean.class)) {
+                if( resolution != null ) { // the bean wanted to handle the errors itself
+                    return resolution;
+                }
                 ValidationErrors validationErrors = ctx.getActionBeanContext().getValidationErrors();
 
                 log.debug("(", ctx.getActionBean().getClass(), ") Checking for validation errors : ", ctx.getLifecycleStage().name());
@@ -594,13 +585,13 @@ public class DispatcherHelper {
                 // It is assumed that an event name that is the same as the HTTP
                 // request method supports that request method.
                 String requestMethod = ctx.getActionBeanContext().getRequest().getMethod();
-                
+
                 if (!handler.getName().equalsIgnoreCase(requestMethod)) {
                     // Check the HTTP request method and ensure that the target handler
                     // method supports it.
                     Collection<HttpRequestMethod> supportedRequestMethods = new ArrayList<HttpRequestMethod>();
 
-                    // First, get the supported HTTP request methods for the target 
+                    // First, get the supported HTTP request methods for the target
                     // event handler method.  If none are explictly declared, then
                     // all HTTP request methods are considered to be supported.
                     for (Annotation annotation : handler.getAnnotations()) {
@@ -614,11 +605,19 @@ public class DispatcherHelper {
                             supportedRequestMethods.add(HttpRequestMethod.DELETE);
                         } else if (annotation instanceof PUT) {
                             supportedRequestMethods.add(HttpRequestMethod.PUT);
+                        } else if (annotation instanceof OPTIONS) {
+                            supportedRequestMethods.add(HttpRequestMethod.OPTIONS);
+                        } else if (annotation instanceof TRACE) {
+                            supportedRequestMethods.add(HttpRequestMethod.TRACE);
+                        } else if (annotation instanceof CONNECT) {
+                            supportedRequestMethods.add(HttpRequestMethod.CONNECT);
+                        } else if (annotation instanceof PATCH) {
+                            supportedRequestMethods.add(HttpRequestMethod.PATCH);
                         }
                     }
 
                     // If no request methods are declared to be supported, then
-                    // add all of them.  
+                    // add all of them.
                     if (supportedRequestMethods.isEmpty()) {
                         supportedRequestMethods.addAll(HttpRequestMethod.all());
                     }
@@ -657,7 +656,13 @@ public class DispatcherHelper {
                 // a exception to be handled differently for RestActionBeans that regular
                 // ActionBeans, they will need to write this code accordingly in their
                 // ExceptionHandler class.
-                Object returnValue = handler.invoke(bean);
+                final Object returnValue;
+                if (NameBasedActionResolver.isAsyncEventHandler(handler)) {
+                    ActionBeanContext abc = ctx.getActionBeanContext();
+                    returnValue = AsyncResponse.newInstance(abc.getRequest(), abc.getResponse(), bean, handler);
+                } else {
+                    returnValue = handler.invoke(bean);
+                }
 
                 fillInValidationErrors(ctx);
 

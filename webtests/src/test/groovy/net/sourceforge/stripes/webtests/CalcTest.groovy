@@ -1,4 +1,4 @@
-package net.sourceforge.stripes.webtests.calc
+package net.sourceforge.stripes.webtests
 
 import org.junit.Test
 import com.pojosontheweb.selenium.ManagedDriverJunit4TestBase

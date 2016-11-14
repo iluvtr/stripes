@@ -24,7 +24,7 @@
     <dependencies>
         <dependency>
             <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
+            <artifactId>javax.servlet-api</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.servlet.jsp</groupId>
@@ -135,7 +135,7 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>generate-javadoc</id>
+                        <id>attach-javadoc</id>
                         <phase>package</phase>
                         <goals>
                             <goal>jar</goal>

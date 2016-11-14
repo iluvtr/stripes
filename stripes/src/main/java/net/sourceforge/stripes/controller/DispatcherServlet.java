@@ -96,6 +96,8 @@ public class DispatcherServlet extends HttpServlet {
         PageContext pageContext = null;
         final ExecutionContext ctx = new ExecutionContext();
 
+        boolean async = false;
+
         try {
             final Configuration config = StripesFilter.getConfiguration();
 
@@ -136,7 +138,7 @@ public class DispatcherServlet extends HttpServlet {
             saveActionBean(request);
             
             Resolution resolution = requestInit(ctx);
-            
+
             if (resolution == null) {
                 resolution = resolveActionBean(ctx);
 
@@ -167,6 +169,29 @@ public class DispatcherServlet extends HttpServlet {
             
             // Whatever stage it came from, execute the resolution
             if (resolution != null) {
+                if (resolution instanceof AsyncResponse) {
+                    // special handling for async resolutions : we defer
+                    // cleanup to async processing. We register a
+                    // "cleanup" callback that the async processing will
+                    // invoke when completed. This allows to hide the details
+                    // from dispatcher (and to cut the dependency on the class,
+                    // so that Stripes still works with Servlet2.x containers.)
+                    async = true;
+                    final PageContext pc = pageContext;
+                    final AsyncResponse asyncResponse = (AsyncResponse)resolution;
+                    asyncResponse.setCleanupCallback(new Runnable() {
+                        @Override
+                        public void run() {
+                            log.debug("Cleaning up AsyncResponse ", asyncResponse);
+                            if (pc != null) {
+                                JspFactory.getDefaultFactory().releasePageContext(pc);
+                                DispatcherHelper.setPageContext(null);
+                            }
+                            requestComplete(ctx);
+                            restoreActionBean(request);
+                        }
+                    });
+                }
                 executeResolution(ctx, resolution);
             }
         }
@@ -189,14 +214,14 @@ public class DispatcherServlet extends HttpServlet {
         }
         finally {
             // Make sure to release the page context
-            if (pageContext != null) {
-                JspFactory.getDefaultFactory().releasePageContext(pageContext);
-                DispatcherHelper.setPageContext(null);
+            if (!async) {
+                if (pageContext != null) {
+                    JspFactory.getDefaultFactory().releasePageContext(pageContext);
+                    DispatcherHelper.setPageContext(null);
+                }
+                requestComplete(ctx);
+                restoreActionBean(request);
             }
-            
-            requestComplete(ctx);
-            
-            restoreActionBean(request);
         }
     }
 

@@ -30,6 +30,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.sourceforge.stripes.controller.AsyncResponse;
 import net.sourceforge.stripes.exception.StripesRuntimeException;
 import net.sourceforge.stripes.util.Log;
 import net.sourceforge.stripes.util.Range;
@@ -238,6 +239,12 @@ public class StreamingResolution implements Resolution {
 
         applyHeaders(response);
         stream(response);
+
+        AsyncResponse asyncResponse = AsyncResponse.get(request);
+        if (asyncResponse != null) {
+            // async started, complete
+            asyncResponse.complete();
+        }
     }
 
     /**
@@ -418,7 +425,7 @@ public class StreamingResolution implements Resolution {
      * @throws Exception if any problems arise when streaming data
      */
     protected void stream(HttpServletResponse response) throws Exception {
-        int length = 0;
+        int length;
         if (this.reader != null) {
             char[] buffer = new char[512];
             try {

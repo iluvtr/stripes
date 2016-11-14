@@ -30,11 +30,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import javax.servlet.*;
+import javax.servlet.http.*;
 
 /**
  * <p>Mock implementation of an HttpServletRequest object.  Allows for setting most values that
@@ -81,15 +80,18 @@ public class MockHttpServletRequest implements HttpServletRequest {
     private String pathInfo    = "";
     private String queryString = "";
 
+    private MockAsyncContext asyncContext = null;
+
     /**
      * Minimal constructor that makes sense. Requires a context path (should be the same as
      * the name of the servlet context, prepended with a '/') and a servlet path. E.g.
      * new MockHttpServletRequest("/myapp", "/actionType/foo.action").
-     *
-     * @param contextPath
+     *  @param contextPath
      * @param servletPath
      */
-    public MockHttpServletRequest(String contextPath, String servletPath) {
+    public MockHttpServletRequest(
+        String contextPath,
+        String servletPath) {
         this.contextPath = contextPath;
         this.servletPath = servletPath;
     }
@@ -202,7 +204,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
     /** Returns the request URI as defined by the servlet spec. */
     public String getRequestURI() { return this.contextPath + this.servletPath + this.pathInfo; }
 
-    /** Returns (an attempt at) a reconstructed URL based on it's constituent parts. */
+    /** Returns (an attempt at) a reconstructed URL based on its constituent parts. */
     public StringBuffer getRequestURL() {
         return new StringBuffer().append(this.protocol)
                                  .append("://")
@@ -278,6 +280,21 @@ public class MockHttpServletRequest implements HttpServletRequest {
             @Override
             public void close() throws IOException {
                 wrappedStream.close();
+            }
+
+            @Override
+            public boolean isFinished() {
+                return wrappedStream.available()==0;
+            }
+
+            @Override
+            public boolean isReady() {
+                return true;
+            }
+
+            @Override
+            public void setReadListener(ReadListener readListener) {
+
             }
         };
     }
@@ -413,4 +430,69 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
     /** Gets the list (potentially empty) or URLs that were included during the request. */
     public List<String> getIncludedUrls() { return this.includedUrls; }
+
+    public String changeSessionId() {
+        return null;
+    }
+
+    public boolean authenticate(HttpServletResponse response) throws IOException, ServletException {
+        return false;
+    }
+
+    public void login(String username, String password) throws ServletException {
+
+    }
+
+    public void logout() throws ServletException {
+
+    }
+
+    public Collection<Part> getParts() throws IOException, ServletException {
+        return null;
+    }
+
+    public Part getPart(String name) throws IOException, ServletException {
+        return null;
+    }
+
+    public <T extends HttpUpgradeHandler> T upgrade(Class<T> handlerClass) throws IOException, ServletException {
+        return null;
+    }
+
+    public long getContentLengthLong() {
+        return 0;
+    }
+
+    public ServletContext getServletContext() {
+        return null;
+    }
+
+    public AsyncContext startAsync() throws IllegalStateException {
+        throw new UnsupportedOperationException("use request,response variant");
+    }
+
+    public AsyncContext startAsync(ServletRequest servletRequest, ServletResponse servletResponse) throws IllegalStateException {
+        if (asyncContext == null) {
+            asyncContext = new MockAsyncContext(servletRequest, servletResponse);
+        } else if (asyncContext.isCompleted()) {
+            throw new IllegalStateException("Async Context already completed");
+        }
+        return asyncContext;
+    }
+
+    public boolean isAsyncStarted() {
+        return asyncContext != null;
+    }
+
+    public boolean isAsyncSupported() {
+        return true;
+    }
+
+    public MockAsyncContext getAsyncContext() {
+        return asyncContext;
+    }
+
+    public DispatcherType getDispatcherType() {
+        return null;
+    }
 }

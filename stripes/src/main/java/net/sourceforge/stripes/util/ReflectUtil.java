@@ -85,12 +85,12 @@ public class ReflectUtil {
 
         primitiveDefaults.put(Boolean.TYPE,    false);
         primitiveDefaults.put(Character.TYPE, '\0');
-        primitiveDefaults.put(Byte.TYPE,       new Byte("0"));
-        primitiveDefaults.put(Short.TYPE,      new Short("0"));
-        primitiveDefaults.put(Integer.TYPE,    new Integer(0));
-        primitiveDefaults.put(Long.TYPE,       new Long(0l));
-        primitiveDefaults.put(Float.TYPE,      new Float(0f));
-        primitiveDefaults.put(Double.TYPE,     new Double(0.0));
+        primitiveDefaults.put(Byte.TYPE,       Byte.valueOf("0"));
+        primitiveDefaults.put(Short.TYPE,      Short.valueOf("0"));
+        primitiveDefaults.put(Integer.TYPE,    Integer.valueOf(0));
+        primitiveDefaults.put(Long.TYPE,       Long.valueOf(0l));
+        primitiveDefaults.put(Float.TYPE,      Float.valueOf(0f));
+        primitiveDefaults.put(Double.TYPE,     Double.valueOf(0.0));
     }
 
     /**
@@ -122,14 +122,14 @@ public class ReflectUtil {
      * following differences:</p>
      *
      * <ul>
-     *   <li>Uses the classes simple name instead of it's fully qualified name.</li>
+     *   <li>Uses the classes simple name instead of its fully qualified name.</li>
      *   <li>Only outputs attributes that are set to non-default values.</li>
      *
      * <p>If, for some unforseen reason, an exception is thrown within this method it will be
      * caught and the return value will be {@code ann.toString()}.
      *
      * @param ann the annotation to convert to a human readable String
-     * @return a human readable String form of the annotation and it's attributes
+     * @return a human readable String form of the annotation and its attributes
      */
     public static String toString(Annotation ann) {
         try {

@@ -14,6 +14,7 @@
  */
 package net.sourceforge.stripes.action;
 
+import net.sourceforge.stripes.controller.AsyncResponse;
 import net.sourceforge.stripes.controller.StripesConstants;
 import net.sourceforge.stripes.util.Log;
 
@@ -144,16 +145,25 @@ public class ForwardResolution extends OnwardResolution<ForwardResolution> {
         String oldEvent = (String) request.getAttribute(StripesConstants.REQ_ATTR_EVENT_NAME);
         request.setAttribute(StripesConstants.REQ_ATTR_EVENT_NAME, event);
 
-        // Figure out if we're inside an include, and use an include instead of a forward
-        if (autoInclude && request.getAttribute(StripesConstants.REQ_ATTR_INCLUDE_PATH) != null) {
-            log.trace("Including URL: ", path);
-            request.getRequestDispatcher(path).include(request, response);
+        // are we asynchronous ?
+        AsyncResponse asyncResponse = AsyncResponse.get(request);
+        if (asyncResponse != null) {
+            // async started, dispatch...
+            log.trace("Async mode, dispatching to URL: ", path);
+            asyncResponse.dispatch(path);
         } else {
-            log.trace("Forwarding to URL: ", path);
-            request.getRequestDispatcher(path).forward(request, response);
+            // Figure out if we're inside an include, and use an include instead of a forward
+            if (autoInclude && request.getAttribute(StripesConstants.REQ_ATTR_INCLUDE_PATH) != null) {
+                log.trace("Including URL: ", path);
+                request.getRequestDispatcher(path).include(request, response);
+            } else {
+                log.trace("Forwarding to URL: ", path);
+                request.getRequestDispatcher(path).forward(request, response);
+            }
+
+            // Revert event name to its original value
+            request.setAttribute(StripesConstants.REQ_ATTR_EVENT_NAME, oldEvent);
         }
 
-        // Revert event name to its original value
-        request.setAttribute(StripesConstants.REQ_ATTR_EVENT_NAME, oldEvent);
     }
 }

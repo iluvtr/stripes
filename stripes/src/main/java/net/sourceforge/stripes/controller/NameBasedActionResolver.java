@@ -14,10 +14,7 @@
  */
 package net.sourceforge.stripes.controller;
 
-import net.sourceforge.stripes.action.ActionBean;
-import net.sourceforge.stripes.action.ActionBeanContext;
-import net.sourceforge.stripes.action.Resolution;
-import net.sourceforge.stripes.action.ForwardResolution;
+import net.sourceforge.stripes.action.*;
 import net.sourceforge.stripes.config.Configuration;
 import net.sourceforge.stripes.exception.StripesServletException;
 import net.sourceforge.stripes.util.Literal;
@@ -243,7 +240,22 @@ public class NameBasedActionResolver extends AnnotatedClassActionResolver {
             name = handler.getName();
         }
 
+        if (name == null && isAsyncEventHandler(handler)) {
+            name = handler.getName();
+        }
+
         return name;
+    }
+
+    public static boolean isAsyncEventHandler(Method handler) {
+        if (!Modifier.isAbstract(handler.getModifiers())
+            && handler.getReturnType().equals(Void.TYPE)
+            && handler.getParameterTypes().length == 1) {
+            // look at arg type
+            Class<?> pType = handler.getParameterTypes()[0];
+            return AsyncResponse.class.isAssignableFrom(pType);
+        }
+        return false;
     }
 
     /**
