@@ -17,23 +17,27 @@ package net.sourceforge.stripes.action;
 
 import com.google.gson.Gson;
 import java.net.HttpURLConnection;
+import java.util.HashMap;
 import java.util.Map;
 import net.sourceforge.stripes.FilterEnabledTestBase;
-import net.sourceforge.stripes.controller.ContentTypeRequestWrapper;
-import net.sourceforge.stripes.controller.DefaultContentTypeRequestWrapperFactory;
+import net.sourceforge.stripes.controller.DispatcherServlet;
+import net.sourceforge.stripes.controller.StripesFilter;
 import net.sourceforge.stripes.controller.json.GsonJsonContentTypeRequestWrapper;
-import net.sourceforge.stripes.controller.json.JsonContentTypeRequestWrapper;
 import net.sourceforge.stripes.mock.MockRoundtrip;
+import net.sourceforge.stripes.mock.MockServletContext;
 import net.sourceforge.stripes.util.Log;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import static net.sourceforge.stripes.controller.DefaultContentTypeRequestWrapperFactory.CONTENT_TYPE_REQUEST_WRAPPER_CONFIGS;
 
 /**
  *
  * @author Néstor Hernández Loli
  */
-public class RestActionBeanNewTest extends FilterEnabledTestBase {
-    private static final Log LOG = Log.getInstance(RestActionBeanNewTest.class);
+public class GsonRestActionBeanTest  extends FilterEnabledTestBase{
+    private static final Log LOG = Log.getInstance(GsonRestActionBeanTest.class);
 
     @Test(groups = "fast")
     public void testHttpAnnotationsWorksOnActionBeans() throws Exception{
@@ -68,7 +72,7 @@ public class RestActionBeanNewTest extends FilterEnabledTestBase {
     }
     
     @RestActionBean
-    @UrlBinding("/person")
+    @UrlBinding("/person2")
     public static class PersonActionBean implements  ActionBean{
         private ActionBeanContext context;
         private Person person;
@@ -101,6 +105,8 @@ public class RestActionBeanNewTest extends FilterEnabledTestBase {
         public void setAge(int age) {    this.age = age; }
          
     }    
+    
+    
     
     
 }

@@ -35,9 +35,9 @@ import net.sourceforge.stripes.util.Log;
  *
  * @author Rick Grashel
  */
-public class JsonContentTypeRequestWrapper implements ContentTypeRequestWrapper {
+public class JacksonJsonContentTypeRequestWrapper implements ContentTypeRequestWrapper {
 
-    private static final Log log = Log.getInstance(JsonContentTypeRequestWrapper.class);
+    private static final Log log = Log.getInstance(JacksonJsonContentTypeRequestWrapper.class);
 
     private Map< String, Set<String>> parameters = new HashMap< String, Set<String>>();
 

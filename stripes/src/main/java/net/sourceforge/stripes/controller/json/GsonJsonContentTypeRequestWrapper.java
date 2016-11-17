@@ -50,7 +50,6 @@ public class GsonJsonContentTypeRequestWrapper implements ContentTypeRequestWrap
         if (jsonElement.isJsonArray()) {
             throw new StripesRuntimeException("The JSON requests bodies must start with an object brace and not an array.");
         }
-
         processElement(jsonElement, null);
     }
 
@@ -98,7 +97,6 @@ public class GsonJsonContentTypeRequestWrapper implements ContentTypeRequestWrap
     @Override
     public String[] getParameterValues(String name) {
         Set<String> values = parameters.get(name);
-
         String[] returnValues = null;
         if (values != null) {
             returnValues = values.toArray(new String[values.size()]);

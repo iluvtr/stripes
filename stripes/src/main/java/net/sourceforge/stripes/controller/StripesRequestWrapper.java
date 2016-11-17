@@ -144,7 +144,7 @@ public class StripesRequestWrapper extends HttpServletRequestWrapper {
             try {
                 this.contentTypeRequestWrapper.build(request);
             } catch (IOException ioe) {
-                throw new StripesServletException("Could not construct JSON request wrapper.", ioe);
+                throw new StripesServletException("Could not construct content type request wrapper.", ioe);
             }
         }
     }
@@ -434,7 +434,7 @@ class MergedParameterMap implements Map<String, String[]> {
             return null;
         } else {
             return mergeParameters(getParameterMap().get(key), uriParams.get(key));
-        }
+        } 
     }
 
     public boolean isEmpty() {
