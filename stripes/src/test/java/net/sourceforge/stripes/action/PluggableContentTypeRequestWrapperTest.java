@@ -37,7 +37,7 @@ import static net.sourceforge.stripes.controller.DefaultContentTypeRequestWrappe
  */
 public class PluggableContentTypeRequestWrapperTest {
 
-    private static final Log LOG = Log.getInstance(GsonRestActionBeanTest.class);
+    private static final Log LOG = Log.getInstance(PluggableContentTypeRequestWrapperTest.class);
 
     private MockServletContext gsonServletContext;
     private MockServletContext jacksonServletContext;
