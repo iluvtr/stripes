@@ -112,12 +112,7 @@ public class PluggableContentTypeRequestWrapperTest {
                 .addFilter(StripesFilter.class, "StripesFilterPCT2", filterParams)
                 .setServlet(DispatcherServlet.class, "StripesDispatcherPCT2", null);
     }
-
-    private void logTripResponse(MockRoundtrip trip) {
-        LOG.debug("TRIP RESPONSE: [Status=" + trip.getResponse().getStatus()
-                + "] [Message=" + trip.getResponse().getOutputString() + "] [Error Message="
-                + trip.getResponse().getErrorMessage() + "]");
-    }
+ 
 
     @RestActionBean
     @UrlBinding("/person")
@@ -132,21 +127,11 @@ public class PluggableContentTypeRequestWrapperTest {
             return new StreamingResolution("text/plain", "Hello world!");
         }
 
-        public Person getPerson() {
-            return person;
-        }
+        public Person getPerson() {  return person;   } 
+        public void setPerson(Person person) {  this.person = person;    }
 
-        public void setPerson(Person person) {
-            this.person = person;
-        }
-
-        public ActionBeanContext getContext() {
-            return context;
-        }
-
-        public void setContext(ActionBeanContext context) {
-            this.context = context;
-        }
+        public ActionBeanContext getContext() {  return context;   } 
+        public void setContext(ActionBeanContext context) {  this.context = context;  }
     }
 
     public static class Person {
@@ -154,21 +139,11 @@ public class PluggableContentTypeRequestWrapperTest {
         private String name;
         private int age;
 
-        public String getName() {
-            return name;
-        }
+        public String getName() {  return name;   } 
+        public void setName(String name) { this.name = name; }
 
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public int getAge() {
-            return age;
-        }
-
-        public void setAge(int age) {
-            this.age = age;
-        }
+        public int getAge() { return age;   } 
+        public void setAge(int age) { this.age = age;  }
 
     }
 
