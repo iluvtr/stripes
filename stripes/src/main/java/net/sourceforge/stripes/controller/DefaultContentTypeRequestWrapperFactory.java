@@ -47,7 +47,7 @@ public class DefaultContentTypeRequestWrapperFactory implements ContentTypeReque
         if (configs == null || configs.trim().isEmpty()) {
             configs = DEFAULT_CONFIGS;
         }
-        ctrClasses = initWrapperClasses(configs);
+        ctrClasses = initClasses(configs);
 
         fillDefaultsIfNotProvided();
 
@@ -60,7 +60,7 @@ public class DefaultContentTypeRequestWrapperFactory implements ContentTypeReque
         }
     }
 
-    private Map<String, Class<? extends ContentTypeRequestWrapper>> initWrapperClasses(String configs) {
+    private Map<String, Class<? extends ContentTypeRequestWrapper>> initClasses(String configs) {
         Map<String, Class<? extends ContentTypeRequestWrapper>> result = new HashMap<String, Class<? extends ContentTypeRequestWrapper>>();
         for (String configStr : StringUtil.standardSplit(configs)) {
             String[] config = configStr.split("=");
