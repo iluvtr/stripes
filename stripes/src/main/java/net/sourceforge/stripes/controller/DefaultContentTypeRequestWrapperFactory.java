@@ -47,6 +47,7 @@ public class DefaultContentTypeRequestWrapperFactory implements ContentTypeReque
         if (configs == null || configs.trim().isEmpty()) {
             configs = DEFAULT_CONFIGS;
         }
+        log.debug("Current configuration provided=" + configs);
         ctrClasses = initClasses(configs);
 
         fillDefaultsIfNotProvided();
@@ -66,7 +67,7 @@ public class DefaultContentTypeRequestWrapperFactory implements ContentTypeReque
             String[] config = configStr.split("=");
             if (config.length != 2) {
                 throw new StripesRuntimeException("Invalid configuration. "
-                        + "The configuration should have two parts separated by '=', eg. application/json=net.sft.MyContentType. "
+                        + "Each configuration should have two parts separated by '=', eg. application/json=net.sft.MyContentType. "
                         + "Actual configuration=" + configStr);
             }
             String contentType = config[0].trim();
