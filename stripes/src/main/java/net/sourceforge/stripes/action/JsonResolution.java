@@ -19,35 +19,48 @@ import net.sourceforge.stripes.controller.AsyncResponse;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import net.sourceforge.stripes.controller.ContentTypeRequestWrapperFactory;
+import net.sourceforge.stripes.controller.StripesFilter;
 
 /**
  * This resolution is intended to be used with Stripes REST action beans. This
  * type of resolution will take a Java object and serialize it to JSON
  * automatically.
  */
-public class JsonResolution extends HttpResolution{
+public class JsonResolution extends HttpResolution {
 
-    private final JsonBuilder builder;
+    private Object objectToSerialize;
+    private String[] excludedProperties;
 
     /**
      * This constructor should be used if the caller wants to return an object
      * and have it automatically serialized into JSON.
      *
      * @param objectToSerialize - Object to serialize into JSON
-     * @param propertiesToExclude - Properties to exclude from marshaling
+     * @param excludedProperties - Properties to exclude from marshaling
      */
-    public JsonResolution(Object objectToSerialize, String... propertiesToExclude) {
+    public JsonResolution(Object objectToSerialize, String... excludedProperties) {
         super(HttpServletResponse.SC_OK);
-        builder = new JsonBuilder( objectToSerialize, propertiesToExclude ); 
+        this.objectToSerialize = objectToSerialize;
+        this.excludedProperties = excludedProperties;
     }
-     
+
     /**
      * Converts the object passed in to JSON and streams it back to the client.
+     *
      * @throws java.lang.Exception
      */
     public void execute(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        super.execute(request, response);
+
         response.setContentType("application/json");
-        builder.build(response.getWriter());
+        JsonBuilderFactory jsonBuilderFactory = StripesFilter.getConfiguration().getJsonBuilderFactory();
+
+        JsonBuilder jsonBuilder = jsonBuilderFactory.create();
+        jsonBuilder.setRootObject(objectToSerialize);
+        jsonBuilder.addPropertyExclusion(excludedProperties);
+        jsonBuilder.build(response.getWriter());
+
         response.flushBuffer();
         AsyncResponse asyncResponse = AsyncResponse.get(request);
         if (asyncResponse != null) {
@@ -55,4 +68,5 @@ public class JsonResolution extends HttpResolution{
             asyncResponse.complete();
         }
     }
+
 }

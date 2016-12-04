@@ -32,6 +32,7 @@ import net.sourceforge.stripes.exception.ExceptionHandler;
 
 import javax.servlet.ServletContext;
 import java.util.Collection;
+import net.sourceforge.stripes.action.JsonBuilderFactory;
 import net.sourceforge.stripes.controller.ContentTypeRequestWrapperFactory;
 
 /**
@@ -220,4 +221,9 @@ public interface Configuration {
      * @return MultipartWrapperFactory an instance of the wrapper factory
      */
     ContentTypeRequestWrapperFactory getContentTypeRequestWrapperFactory();
+    
+    
+    JsonBuilderFactory getJsonBuilderFactory();
+    
+    
 }

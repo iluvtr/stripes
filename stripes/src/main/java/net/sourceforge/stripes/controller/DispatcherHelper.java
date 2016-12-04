@@ -14,6 +14,8 @@
  */
 package net.sourceforge.stripes.controller;
 
+import java.io.StringWriter;
+import java.io.Writer;
 import java.lang.annotation.Annotation;
 
 import net.sourceforge.stripes.action.*;
@@ -445,7 +447,7 @@ public class DispatcherHelper {
             // For RestActionBean objects, we need to package up all of the validation errors
             // and return them to the caller in an ErrorResolution
             if (bean.getClass().isAnnotationPresent(RestActionBean.class)) {
-                if( resolution != null ) { // the bean wanted to handle the errors itself
+                if (resolution != null) { // the bean wanted to handle the errors itself
                     return resolution;
                 }
                 ValidationErrors validationErrors = ctx.getActionBeanContext().getValidationErrors();
@@ -495,12 +497,15 @@ public class DispatcherHelper {
 
                         jsonErrorMap.put("fieldErrors", allFieldErrors);
                     }
-
-                    JsonBuilder jsonBuilder = new JsonBuilder(jsonErrorMap);
-
+                    JsonBuilderFactory jsonBuilderFactory = StripesFilter.getConfiguration().getJsonBuilderFactory();
+                    
+                    JsonBuilder jsonBuilder = jsonBuilderFactory.create();
+                    jsonBuilder.setRootObject(jsonErrorMap);
+                    
                     log.debug("(", ctx.getActionBean().getClass(), ") Returning validation error resolution : ", ctx.getLifecycleStage().name());
-
-                    return new ErrorResolution(HttpServletResponse.SC_BAD_REQUEST, jsonBuilder.build());
+                    Writer writer = new StringWriter();
+                    jsonBuilder.build(writer);
+                    return new ErrorResolution(HttpServletResponse.SC_BAD_REQUEST, writer.toString());
                 }
             } else {
 

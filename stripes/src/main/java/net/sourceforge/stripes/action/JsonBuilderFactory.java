@@ -15,10 +15,13 @@
  */
 package net.sourceforge.stripes.action;
 
+import net.sourceforge.stripes.config.ConfigurableComponent;
+
 /**
- *
+ *Factory for classes that implement JsonBuilders {@link JsonBuilder}. 
  * @author Néstor Hernández Loli
  */
-public class JsonBuilderFactory {
+public interface JsonBuilderFactory extends ConfigurableComponent {
     
+    JsonBuilder create();
 }

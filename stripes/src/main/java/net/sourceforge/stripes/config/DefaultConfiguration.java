@@ -25,6 +25,8 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
+import net.sourceforge.stripes.action.DefaultJsonBuilderFactory;
+import net.sourceforge.stripes.action.JsonBuilderFactory;
 
 import net.sourceforge.stripes.controller.ActionBeanContextFactory;
 import net.sourceforge.stripes.controller.ActionBeanPropertyBinder;
@@ -104,6 +106,7 @@ public class DefaultConfiguration implements Configuration {
     private MultipartWrapperFactory multipartWrapperFactory;
     private ValidationMetadataProvider validationMetadataProvider;
     private ContentTypeRequestWrapperFactory contentTypeRequestWrapperFactory;
+    private JsonBuilderFactory jsonBuilderFactory;
     
     /** Gratefully accepts the BootstrapPropertyResolver handed to the Configuration. */
     public void setBootstrapPropertyResolver(BootstrapPropertyResolver resolver) {
@@ -221,6 +224,13 @@ public class DefaultConfiguration implements Configuration {
                 this.contentTypeRequestWrapperFactory = new DefaultContentTypeRequestWrapperFactory();
                 this.contentTypeRequestWrapperFactory.init(this);
             }
+            this.jsonBuilderFactory = initJsonBuilderFactory();
+            if (this.jsonBuilderFactory == null) {
+                this.jsonBuilderFactory = new DefaultJsonBuilderFactory();
+                this.jsonBuilderFactory.init(this);
+            }
+            
+            
             this.interceptors = new HashMap<LifecycleStage, Collection<Interceptor>>();
             Map<LifecycleStage, Collection<Interceptor>> map = initCoreInterceptors();
             if (map != null) {
@@ -230,7 +240,7 @@ public class DefaultConfiguration implements Configuration {
             if (map != null) {
                 mergeInterceptorMaps(this.interceptors, map);
             }
-
+            
             // do a quick check to see if any interceptor classes are configured more than once
             for (Map.Entry<LifecycleStage, Collection<Interceptor>> entry : this.interceptors.entrySet()) {
                 Set<Class<? extends Interceptor>> classes = new HashSet<Class<? extends Interceptor>>();
@@ -523,11 +533,19 @@ public class DefaultConfiguration implements Configuration {
     protected Map<LifecycleStage,Collection<Interceptor>> initInterceptors() { return null; }
     
     protected ContentTypeRequestWrapperFactory initContentTypeRequestWrapperFactory() { return null; }
+    
+    protected JsonBuilderFactory initJsonBuilderFactory() { return null; }
 
     @Override
     public ContentTypeRequestWrapperFactory getContentTypeRequestWrapperFactory() {
         return contentTypeRequestWrapperFactory;
     }
+
+    @Override
+    public JsonBuilderFactory getJsonBuilderFactory() {
+        return jsonBuilderFactory;
+    }
+    
     
     
 }
